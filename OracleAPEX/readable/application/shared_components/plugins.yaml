@@ -1,0 +1,845 @@
+---
+- # ====== Plugin: Avatar ======================================
+  id: 9536412533445726
+  identification: 
+    name: Avatar
+
+- # ====== Plugin: Badge =======================================
+  id: 9545383355445740
+  identification: 
+    name: Badge
+
+- # ====== Plugin: Button ======================================
+  id: 9551293039445742
+  identification: 
+    name: Button
+
+- # ====== Plugin: Media List ==================================
+  id: 9553910028445744
+  identification: 
+    name: Media List
+
+- # ====== Plugin: Timeline ====================================
+  id: 9570636121445750
+  identification: 
+    name: Timeline
+
+- # ====== Plugin: Content Row =================================
+  id: 9586061072445755
+  identification: 
+    name: Content Row
+
+- # ====== Plugin: Comments ====================================
+  id: 9608422987445762
+  identification: 
+    name: Comments
+
+- # ====== Plugin: Apexcharts ==================================
+  id: 52775086266229476813
+  identification: 
+    name: Apexcharts
+
+  source: 
+    pl/sql-code: |
+      -- =============================================================================
+      --
+      --  Created by Richard Baldogi
+      --
+      --  This plug-in provides a region where you can display different
+      --  kinds of interactive charts
+      --
+      --  License: MIT
+      --
+      --  GitHub: https://github.com/baldogiRichard/apex-charts
+      --
+      -- =============================================================================
+      
+      --a boolean function that converts TRUE or FALSE string values into boolean values
+      function get_boolean(p_bool in varchar2)
+      return boolean
+      as
+      begin
+          return case when upper(p_bool) = 'TRUE'
+                          then true
+                      when upper(p_bool) = 'FALSE'
+                          then false
+                      when p_bool = 1
+                          then true
+                      when p_bool = 0
+                          then false
+                      when p_bool = '1'
+                          then true
+                      when p_bool = '0'
+                          then false
+                      when p_bool = 'Y'
+                          then true
+                      when p_bool = 'N'
+                          then false
+                      when length(p_bool) > 0
+                          then true
+                      when length(p_bool) = 0
+                          then false
+                      when p_bool is null
+                          then true
+                      when p_bool is not null
+                          then false
+                      end;
+      end get_boolean;
+      
+      
+      
+      -- write proper value type in JSON
+      -- in case of:
+      -- date: milliseconds in number
+      -- number: number
+      -- string: varchar2
+      procedure setProperTypeToJSON(p_val in varchar2,
+                                    p_nam in varchar2 default null)
+      is
+          dtn number;
+      
+          --check if value is date
+          --if true a special format is required for the data
+          function getMillisecondsIfDateY(p_value varchar2)
+          return number
+          as
+          begin
+              return round ( ( ( trunc (to_date(p_value), 'MI') - DATE '1970-01-01')* 24 * 60 * 60) + extract (second from systimestamp), 3) * 1000;
+          exception 
+              when others then
+                  return to_number(p_value);
+          end getMillisecondsIfDateY;
+      begin
+          dtn := getMillisecondsIfDateY(p_val);
+          
+          if p_nam is null then
+              apex_json.write(p_value => dtn);
+          else
+              apex_json.write(p_name => p_nam
+                             ,p_value => dtn);
+          end if;
+      exception 
+          when others then
+              if p_nam is null then
+                  apex_json.write(p_value => p_val);
+              else
+                  apex_json.write(p_name => p_nam
+                                 ,p_value => p_val);
+              end if;
+      end;
+      
+      --render
+      function render
+        ( p_region              in apex_plugin.t_region
+        , p_plugin              in apex_plugin.t_plugin
+        , p_is_printer_friendly in boolean
+        )
+      return apex_plugin.t_region_render_result
+      as
+          --region and ajax id
+          l_region_id     p_region.static_id%type    := p_region.static_id;
+          l_ajax_id       p_region.static_id%type    := apex_plugin.get_ajax_identifier;
+      
+          l_result        apex_plugin.t_region_render_result;
+      
+          --region source
+          l_source                            p_region.source%type   := p_region.source;
+          l_context                           apex_exec.t_context;
+          l_context_distinct                  apex_exec.t_context;         
+          l_init_js                           varchar2(32767)        := nvl(apex_plugin_util.replace_substitutions(p_region.init_javascript_code), 'undefined');
+      
+          --attributes
+          l_type                            p_region.attribute_01%type := p_region.attribute_01;
+          l_name                            p_region.attribute_02%type := p_region.attribute_02;
+          l_title                           p_region.attribute_03%type := p_region.attribute_03;
+          l_width                           p_region.attribute_04%type := p_region.attribute_04;
+          l_height                          p_region.attribute_05%type := p_region.attribute_05;
+          l_label_x                         p_region.attribute_06%type := p_region.attribute_06;
+          l_category_x                      p_region.attribute_07%type := p_region.attribute_07;
+          l_values_y                        p_region.attribute_08%type := p_region.attribute_08;
+          l_additional_cols                 p_region.attribute_09%type := p_region.attribute_09;
+          l_title_x                         p_region.attribute_10%type := p_region.attribute_10;
+          l_title_y                         p_region.attribute_11%type := p_region.attribute_11;
+          l_combo_chart_type                p_region.attribute_12%type := p_region.attribute_12;
+          l_combo_chart_name                p_region.attribute_13%type := p_region.attribute_13;
+          l_toolbar_features                p_region.attribute_14%type := p_region.attribute_14;
+          l_sync_charts                     p_region.attribute_15%type := p_region.attribute_15;
+          l_sync_group_name                 p_region.attribute_16%type := p_region.attribute_16;
+          l_target_chart                    p_region.attribute_17%type := p_region.attribute_17;
+          l_selection_type                  p_region.attribute_18%type := p_region.attribute_18;
+      
+          --toolbar features / booleans
+          l_download                        boolean := instr(l_toolbar_features, 'DOWNLOAD' ) > 0;
+          l_selection                       boolean := instr(l_toolbar_features, 'SELECTION') > 0;
+          l_zoom                            boolean := instr(l_toolbar_features, 'ZOOM'     ) > 0;
+          l_pan                             boolean := instr(l_toolbar_features, 'PAN'      ) > 0;
+          l_reset                           boolean := instr(l_toolbar_features, 'RESET'    ) > 0;
+      
+          l_type_bool                       boolean := l_type not in ('pie','donut','polarArea','radialBar','bubble','scatter');
+          l_type_bool_2                     boolean := l_type in ('bubble','scatter');
+          l_type_bool_3                     boolean := l_type in ('heatmap','rangeBar','treemap');
+      
+          --query variables
+          l_label_x_col_pos                   pls_integer;
+          l_category_x_col_pos                pls_integer;
+          l_values_y_col_pos                  pls_integer;
+          l_combo_chart_type_col_pos          pls_integer;
+          l_combo_chart_name_col_pos          pls_integer;
+      
+          l_additional_col_pos                pls_integer;
+      
+          --value variables
+          l_label_x_col_val                   varchar2(32767);
+          l_category_x_col_val                varchar2(32767);
+          l_values_y_col_val_dt               varchar2(32767);
+          l_combo_chart_type_col_val          varchar2(32767);
+          l_combo_chart_name_col_val          varchar2(32767);
+          l_values_y_col_val                  varchar2(32767);
+          l_values_y_col_val_n                number;
+      
+          l_additional_col_val                varchar2(32767);
+          l_additional_col_val_n number;
+      
+          --variables for parsing multi type charts
+          l_additional_cols_arr               apex_application_global.vc_arr2;
+          l_chart_types                       apex_t_varchar2;
+          l_chart_names                       apex_t_varchar2;
+      
+          l_chart_type_pos                    pls_integer;
+          l_chart_name_pos                    pls_integer;   
+      
+          l_chart_type_val                    varchar2(32767);
+          l_chart_name_val                    varchar2(32767);
+      
+          l_columns                           apex_exec.t_columns;
+          l_filters                           apex_exec.t_filters;
+      
+          --region and ajax id
+          l_region_id     p_region.static_id%type    := p_region.static_id;
+          l_ajax_id       p_region.static_id%type    := apex_plugin.get_ajax_identifier;
+      
+          --other variables
+          l_source_distinct       p_region.source%type;
+          l_data                  clob;
+          l_date                  constant varchar2(10) := to_char(to_date(sysdate),'yyyy.mm.dd');
+          l_type_last             varchar2(50);
+          l_exception_type_string constant varchar2(2000) := 'bar-horizontal boxPlot-horizontal bar-vertical boxPlot-vertical rangeArea rangeBar candlestick pie donut radar combo polarArea radialBar bubble scatter heatmap treemap'; --line area
+      
+          --array variables (series, label)
+          l_series_arr   apex_t_number;
+          l_labels_arr   apex_t_varchar2;
+      
+          --boolean variables for type check
+          l_ctypes_bool_horizontal       boolean;
+          l_ctypes_exceptions            boolean;
+          l_ctypes_arr                   apex_t_varchar2;
+      
+          l_isbar                        boolean;
+          l_isboxplot                    boolean;
+          l_israngebar                   boolean;
+          l_israngearea                  boolean;
+          l_ctypes_string                varchar2(2000);
+      
+      begin
+      
+          --debug
+          if apex_application.g_debug
+          then
+              apex_plugin_util.debug_region
+                ( p_plugin => p_plugin
+                , p_region => p_region
+                );
+          end if;
+      
+          -----------------------------------------------------------------------------------------
+          --                                    Part 1:                                          --
+          --                                                                                     --
+          -- Gathering infos for JSON data generation:                                           -- 
+          -- Multiple (combo) or single type chart                                               --
+          -- Checking for exceptions which affects some parts in JSON generation                 --
+          -----------------------------------------------------------------------------------------
+      
+          --generate array for categories and chart types
+          if (l_combo_chart_type is not null or l_type_bool_2 or l_type_bool_3) then
+      
+              --open query
+              l_source_distinct := 'select distinct ' || case when l_combo_chart_type is not null 
+                                                               then l_combo_chart_type || ' , ' || l_combo_chart_name 
+                                                               else nvl(l_combo_chart_name,l_category_x) 
+                                                         end
+                                  || ' from (' || l_source || ') t';
+      
+              l_context_distinct := apex_exec.open_query_context
+                  ( p_location        => apex_exec.c_location_local_db
+                  , p_sql_query       => l_source_distinct
+                  , p_total_row_count => true
+                  );    
+                  
+              l_chart_type_pos             := apex_exec.get_column_position(l_context_distinct, l_combo_chart_type);
+              l_chart_name_pos             := apex_exec.get_column_position(l_context_distinct, nvl(l_combo_chart_name,l_category_x));
+      
+              --push values into array
+              while apex_exec.next_row(l_context_distinct) 
+              loop
+      
+                  l_chart_type_val         := case when l_combo_chart_type is not null 
+                                                    then apex_exec.get_varchar2   ( l_context_distinct , l_chart_type_pos)
+                                                   else l_type
+                                              end;
+      
+                  l_chart_name_val         := apex_exec.get_varchar2   ( l_context_distinct , l_chart_name_pos);
+      
+                  apex_string.push(l_chart_types  ,   nvl(l_chart_type_val,l_type));
+                  apex_string.push(l_chart_names  ,   l_chart_name_val);
+      
+              end loop;
+      
+          else
+              
+              apex_string.push(l_chart_types  ,   l_type);
+              apex_string.push(l_chart_names  ,   l_name);
+      
+          end if;
+      
+          --convert array to string check if
+          --vertical or horizontal chart types are exist in the list
+          l_ctypes_arr    := apex_string_util.find_phrases( p_phrases => l_chart_types
+                                                          , p_string  => 'bar-horizontal boxPlot-horizontal rangeBar');
+      
+          l_ctypes_bool_horizontal   := l_ctypes_arr.count > 0;
+      
+          l_ctypes_arr    := apex_string_util.find_phrases( p_phrases => l_chart_types
+                                                          , p_string  => l_exception_type_string);   
+      
+          l_ctypes_exceptions      := l_ctypes_arr.count > 0;
+      
+          --checktypes
+          l_ctypes_string := apex_string.join( p_table => l_chart_types
+                                             , p_sep   => ',');
+      
+          l_isboxplot       := instr(l_ctypes_string, 'boxPlot-'        ) > 0;
+          l_isbar           := instr(l_ctypes_string, 'bar-'            ) > 0;
+          l_israngearea     := instr(l_ctypes_string, 'rangeArea'       ) > 0;
+          l_israngebar      := instr(l_ctypes_string, 'rangeBar'        ) > 0;
+      
+          apex_exec.close(l_context_distinct);
+      
+          -------------------------------------------------------------------------------------------------
+          --                                    Part 2:                                                  --
+          --                                                                                             --
+          -- Generate data array JSON accordingly to Part 1                                              --
+          -- Three data formats are available :                                                          --
+          --                                                                                             --
+          -- data formats 1: ({x: valX, y: valY} OR {x: valX, y: [val1Y, val2Y, valnY]})                 --
+          --                                                                                             --
+          -- data formats 2: {name: nameVal, data: [val1, val2, valn]}                                   --
+          -- OR {name: nameVal, data: [ [val1, val2], [val3, val4], [val5, valn] ]}                      --
+          -- OR {name: nameVal, data: [ [val1, val2, val3], [val4, val5, val 6], [val7, val8, valn] ]}   --
+          --                                                                                             --
+          -- data format 3: (series: [val1, val2, valn], labels: [val1, val2, valn])                     --
+          -------------------------------------------------------------------------------------------------
+      
+          --loop through chart types
+          for i in 1..l_chart_types.count loop
+               
+              --create filter
+              if (l_combo_chart_type is not null or l_type_bool_2 or l_type_bool_3) then
+                  apex_exec.add_filter(
+                      p_filters     => l_filters,
+                      p_filter_type => apex_exec.c_filter_eq,
+                      p_column_name => nvl(l_combo_chart_name,l_category_x),
+                      p_value       => l_chart_names(i)
+                  );
+              end if;
+      
+              --create data JSON
+              l_context := apex_exec.open_query_context
+                  ( p_location        => apex_exec.c_location_local_db
+                  , p_sql_query       => l_source
+                  , p_total_row_count => true
+                  , p_filters         => case when (l_combo_chart_type is not null or l_type_bool_2 or l_type_bool_3)
+                                          then l_filters
+                                          else apex_exec.c_empty_filters
+                                         end
+                  );
+      
+              -- empty filter to avoid multiple filter insertion
+              -- when looping through chart types in mode "combo"
+              l_filters := apex_exec.c_empty_filters;
+      
+              if i = 1 then
+      
+                  l_category_x_col_pos   := apex_exec.get_column_position(l_context, l_category_x);
+                  l_values_y_col_pos     := apex_exec.get_column_position(l_context, l_values_y);
+                  l_label_x_col_pos      := apex_exec.get_column_position(l_context, l_label_x);
+      
+              end if;
+      
+              apex_json.initialize_clob_output;
+      
+              /*generate data formats 1: (x: valX, y: valY OR x: valX, y: [val1Y, val2Y, valnY])
+                types: bar-horizontal, bar-vertical, boxPlot-horizontal, boxPlot-vertical, rangeArea,
+                       rangeBar, candlestick, combo, heatmap, treemap
+              */
+              if l_type_bool then
+      
+                  --open bracket for chart object i
+                  apex_json.open_object;
+      
+                      --name
+                      apex_json.write( p_name  => 'name'
+                                     , p_value => l_chart_names(i));
+      
+                      --type
+                      if not l_ctypes_exceptions then
+      
+                          apex_json.write( p_name  => 'type'
+                                         , p_value => case 
+                                                          when l_chart_types(i) in ('bar-horizontal','bar-vertical')
+                                                             then 'bar'
+                                                          when l_chart_types(i) in ('boxPlot-horizontal', 'boxPlot-vertical')
+                                                             then 'boxPlot'
+                                                          else l_chart_types(i)
+                                                      end
+                                          );
+      
+                      end if;
+      
+                      apex_json.open_array( p_name => 'data');
+      
+                          while apex_exec.next_row(l_context) 
+                          loop
+                              l_category_x_col_val          := apex_exec.get_varchar2   ( l_context , l_category_x_col_pos  );
+      
+                              apex_json.open_object;
+      
+                                  --x axis
+                                  setProperTypeToJSON(l_category_x_col_val,'x');
+      
+                                  --y axis
+                                  --generate array for charts if type in
+                                  if l_chart_types(i) in ('rangeArea',
+                                                          'rangeBar',
+                                                          'candlestick',
+                                                          'boxPlot-vertical',
+                                                          'boxPlot-horizontal') then
+      
+                                      l_additional_cols_arr := apex_string.string_to_table( p_str => l_additional_cols
+                                                                                          , p_sep => ',');
+      
+                                      --open array
+                                      apex_json.open_array(p_name => 'y');
+      
+                                          for cx in 1..l_additional_cols_arr.count
+                                          loop
+      
+                                              l_additional_col_pos := apex_exec.get_column_position(l_context, l_additional_cols_arr(cx));
+                                              l_values_y_col_val := apex_exec.get_varchar2 (l_context, l_additional_col_pos      );
+                                              setProperTypeToJSON(l_values_y_col_val);
+      
+                                          end loop;
+      
+                                      --close array
+                                      apex_json.close_array;
+      
+                                  else
+                                      l_values_y_col_val_n  := apex_exec.get_number   ( l_context , l_values_y_col_pos    );
+                                      apex_json.write( p_name  => 'y'
+                                                     , p_value => l_values_y_col_val_n);
+                                  end if;
+      
+                              apex_json.close_object;
+      
+                          end loop;
+      
+                      apex_json.close_array;
+      
+                  --close bracket for chart object i
+                  apex_json.close_object;
+      
+              end if;
+      
+              /*generate data formats 2: {name: nameVal, data: [val1, val2, valn]} 
+                OR {name: nameVal, data: [ [val1, val2], [val3, val4], [val5, valn] ]}
+      
+                types: bubble, scatter
+              */
+              if l_type_bool_2 then
+      
+                  l_additional_cols_arr := apex_string.string_to_table( p_str => l_additional_cols
+                                                                      , p_sep => ',');
+      
+                  apex_json.open_object;
+      
+                      --name
+                      apex_json.write( p_name  => 'name'
+                                     , p_value => l_chart_names(i));
+      
+                      --data
+                      apex_json.open_array( p_name => 'data');
+      
+                          --series and labels array
+                          while apex_exec.next_row(l_context) loop
+                            
+                              apex_json.open_array;
+      
+                                  l_values_y_col_val  := apex_exec.get_varchar2   ( l_context , l_values_y_col_pos    );
+      
+                                  setProperTypeToJSON(l_values_y_col_val);
+      
+                                  for cx in 1..l_additional_cols_arr.count
+                                  loop
+      
+                                      l_additional_col_pos   := apex_exec.get_column_position(l_context, l_additional_cols_arr(cx));
+                                      l_additional_col_val_n := apex_exec.get_number         (l_context, l_additional_col_pos     );
+                                      
+                                      apex_json.write(l_additional_col_val_n);
+      
+                                  end loop;
+      
+                              apex_json.close_array;
+      
+                          end loop;
+      
+                      apex_json.close_array;
+      
+                  apex_json.close_object;
+      
+              end if;
+      
+          l_data := case 
+                      when i = 1
+                       then l_data || apex_json.get_clob_output
+                      when i > 1 or i = l_chart_types.count
+                       then l_data || ',' || apex_json.get_clob_output
+                      else l_data || apex_json.get_clob_output
+                    end;
+      
+          apex_json.free_output;
+      
+          end loop;
+      
+          l_type_last := l_chart_types(l_chart_types.count);
+      
+          --generate objects for charts
+          apex_json.initialize_clob_output;
+      
+          --open bracket
+          apex_json.open_object;
+      
+          --generate series array from
+          if l_type_bool or l_type_bool_2 then
+      
+              apex_json.open_array(p_name => 'series');
+      
+                  apex_json.write_raw(p_value => l_data);
+      
+              apex_json.close_array;
+      
+          /*generate data format 3: (series: [val1, val2, valn], labels: [val1, val2, valn])
+            types: pie, donut, polarArea, radialBar, radar*/
+          else
+      
+              l_label_x_col_pos := apex_exec.get_column_position(l_context, l_label_x);
+      
+              --series and labels array
+              while apex_exec.next_row(l_context) loop
+      
+                  l_values_y_col_val := apex_exec.get_number   (l_context , l_values_y_col_pos);
+                  l_label_x_col_val  := apex_exec.get_varchar2 (l_context , l_label_x_col_pos );
+                          
+                  apex_string.push(l_series_arr,l_values_y_col_val);
+                  apex_string.push(l_labels_arr,l_label_x_col_val);
+      
+              end loop;
+      
+              apex_json.write( p_name    => 'series'
+                             , p_values  => l_series_arr);
+      
+              apex_json.write( p_name    => 'labels'
+                             , p_values  => l_labels_arr);
+                 
+          end if;
+      
+          apex_exec.close(l_context);
+      
+          -----------------------------------------------------------------------------------------
+          --                                    Part 3:                                          --
+          --                                                                                     --
+          --     Adding additional data to JSON that affects the visual display of the chart     --
+          --                                                                                     --
+          -----------------------------------------------------------------------------------------
+          
+          /*appending additional data / options*/
+          --title
+          if l_title is not null then
+      
+              apex_json.open_object(p_name => 'title');
+      
+                  apex_json.write( p_name  => 'text'
+                                 , p_value => l_title);
+      
+              apex_json.close_object;
+      
+          end if;
+      
+          --in some cases types have to be defined in
+          --the chart attributes
+          apex_json.open_object(p_name => 'chart');
+      
+              if l_ctypes_exceptions then
+      
+                  apex_json.write( p_name  => 'type'
+                                 , p_value => case 
+                                                  when l_isbar
+                                                     then 'bar'
+                                                  when l_isboxplot
+                                                     then 'boxPlot'
+                                                  when l_israngebar
+                                                     then 'rangeBar'
+                                                  when l_israngearea
+                                                     then 'rangeArea'
+                                                  when l_type_last in ('radar',
+                                                                       'polarArea',
+                                                                       'radialBar',
+                                                                       'bubble',
+                                                                       'scatter')
+                                                      then l_type_last                                         
+                                                 else l_type
+                                              end);
+      
+              end if;
+      
+              --width, height
+              apex_json.write( p_name  => 'width'
+                             , p_value => l_width);
+      
+              apex_json.write( p_name  => 'height'
+                             , p_value => l_height);
+      
+              apex_json.write( p_name  => 'id'
+                             , p_value => l_name);
+      
+              --sync charts
+              if l_sync_charts = 'Y' then
+      
+                  apex_json.write( p_name  => 'group'
+                                 , p_value => l_sync_group_name);
+      
+              end if;
+      
+              --targeting chart when selection enabled
+              if l_target_chart is not null then
+      
+                  apex_json.open_object(p_name => 'brush');
+      
+                      apex_json.write( p_name  => 'target'
+                                     , p_value => l_target_chart);
+      
+                      apex_json.write( p_name  => 'enabled'
+                                     , p_value => l_selection);
+      
+                  apex_json.close_object;
+      
+              end if;
+      
+              --toolbar features
+              if l_toolbar_features is not null then
+      
+                  --toolbar default
+                  apex_json.open_object(p_name => 'toolbar');
+      
+                      apex_json.write( p_name  => 'show'
+                                     , p_value => get_boolean(1));
+      
+                      apex_json.write( p_name  => 'offsetX'
+                                     , p_value => 0);
+      
+                      apex_json.write( p_name  => 'offsetY'
+                                     , p_value => 0);
+      
+                      --toolbar features
+                      apex_json.open_object(p_name => 'toolbar');
+      
+                          apex_json.write( p_name  => 'download'
+                                         , p_value => l_download);
+      
+                          apex_json.write( p_name  => 'selection'
+                                         , p_value => l_selection);
+      
+                          apex_json.write( p_name  => 'zoom'
+                                         , p_value => l_zoom);
+      
+                          apex_json.write( p_name  => 'zoomin'
+                                         , p_value => l_zoom);
+      
+                          apex_json.write( p_name  => 'zoomout'
+                                         , p_value => l_zoom);
+      
+                          apex_json.write( p_name  => 'pan'
+                                         , p_value => l_pan);
+      
+                          apex_json.write( p_name  => 'reset'
+                                         , p_value => l_reset);
+      
+                      apex_json.close_object;
+      
+                  apex_json.close_object;
+      
+                  --export
+                  if l_download then
+      
+                      apex_json.open_object(p_name => 'export');
+      
+                         --csv
+                         apex_json.open_object(p_name => 'csv');
+      
+                              apex_json.write( p_name  => 'filename'
+                                             , p_value => l_title || '_' || l_date
+                                             );
+      
+                              apex_json.write( p_name  => 'headerCategory'
+                                             , p_value => case when l_label_x is not null
+                                                                 then l_label_x
+                                                               else l_category_x
+                                                          end);
+      
+                              apex_json.write( p_name  => 'headerValue'
+                                             , p_value => case when l_values_y is not null
+                                                                 then l_values_y
+                                                               else l_additional_cols
+                                                          end);
+      
+                         apex_json.close_object;        
+      
+                         --svg
+                         apex_json.open_object(p_name => 'svg');
+      
+                              apex_json.write( p_name  => 'filename'
+                                             , p_value => l_title || '_' || l_date
+                                             );
+      
+                         apex_json.close_object;
+                       
+                         --png
+                         apex_json.open_object(p_name => 'png');
+      
+                              apex_json.write( p_name  => 'filename'
+                                             , p_value => l_title || '_' || l_date
+                                             );
+      
+                         apex_json.close_object;
+      
+                      apex_json.close_object;
+      
+                  end if;
+      
+                  --zoom
+                  if l_zoom then
+      
+                      apex_json.open_object(p_name => 'zoom');
+      
+                          apex_json.write( p_name  => 'enabled'
+                                         , p_value => l_zoom);
+      
+                          apex_json.write( p_name  => 'type'
+                                         , p_value => l_selection_type);
+      
+                      apex_json.close_object;
+      
+                  else
+      
+                      apex_json.open_object(p_name => 'zoom');
+      
+                          apex_json.write( p_name  => 'enabled'
+                                         , p_value => l_zoom);
+      
+                      apex_json.close_object;                    
+      
+                  end if;
+      
+              else
+      
+                  --toolbar default
+                  apex_json.open_object(p_name => 'toolbar');
+      
+                      apex_json.write( p_name  => 'show'
+                                     , p_value => get_boolean(0));
+      
+                  apex_json.close_object;
+      
+              end if;
+      
+          apex_json.close_object;
+      
+          --title: Axis X, Y
+          if l_title_x is not null then
+      
+              apex_json.open_object(p_name => 'xaxis');
+      
+                  apex_json.open_object(p_name => 'title');
+      
+                      apex_json.write( p_name  => 'text'
+                                     , p_value => l_title_x);
+      
+                  apex_json.close_object;
+      
+              apex_json.close_object;
+      
+          end if;
+      
+          if l_title_y is not null then
+      
+              apex_json.open_object(p_name => 'yaxis');
+      
+                  apex_json.open_object(p_name => 'title');
+      
+                      apex_json.write( p_name  => 'text'
+                                     , p_value => l_title_y);
+      
+                  apex_json.close_object;
+      
+              apex_json.close_object;
+      
+          end if;
+      
+          --horizontal / vertical adjustment
+          if l_ctypes_bool_horizontal then
+              
+              apex_json.open_object(p_name => 'plotOptions');
+      
+                  apex_json.open_object(p_name => 'bar');
+      
+                      apex_json.write( p_name  => 'horizontal'
+                                     , p_value => l_ctypes_bool_horizontal
+                                     );
+      
+                  apex_json.close_object;
+      
+              apex_json.close_object;
+      
+          end if;
+      
+          --close bracket
+          apex_json.close_object;
+      
+      
+          -----------------------------------------------------------------------------------------
+          --                                    Part 4:                                          --
+          --                                                                                     --
+          --                          Passing the code to the front.                             --
+          --                                                                                     --
+          -----------------------------------------------------------------------------------------
+      
+          --printing region
+          sys.htp.p('<div id="' || l_name || '"></div>');
+      
+          --Add onload code
+          apex_javascript.add_onload_code(p_code => 'APEXCHARTS.initialize("'|| l_name || '",' || apex_json.get_clob_output || ','|| l_init_js ||');');
+          
+          apex_json.free_output;
+      
+          return l_result;
+      
+      end render;
+

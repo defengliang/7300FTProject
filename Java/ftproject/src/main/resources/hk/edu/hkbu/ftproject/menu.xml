@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://jmix.io/schema/flowui/menu">
+
+    <menu id="application" title="msg://hk.edu.hkbu.ftproject/menu.application.title" opened="true">
+        <item view="ftp_User.list" title="msg://hk.edu.hkbu.ftproject.view.user/UserListView.title"/>
+        <item view="ftp_EvalTbl.list" title="msg://hk.edu.hkbu.ftproject.view.evaltbl/evalTblListView.title"/>
+        <item view="ftp_ClassifierTbl.list"
+              title="msg://hk.edu.hkbu.ftproject.view.classifiertbl/classifierTblListView.title"/>
+        <item view="ftp_TargetTbl.list" title="msg://hk.edu.hkbu.ftproject.view.targettbl/targetTblListView.title"/>
+        <item view="ftp_PriceTbl.list" title="msg://hk.edu.hkbu.ftproject.view.pricetbl/priceTblListView.title"/>
+        <item view="ftp_CompanyFile.list"
+              title="msg://hk.edu.hkbu.ftproject.view.companyfile/companyFileListView.title"/>
+    </menu>
+
+</menu-config>

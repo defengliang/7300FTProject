@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://priceTblDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="priceTblDc"
+                  class="hk.edu.hkbu.ftproject.entity.PriceTbl">
+            <fetchPlan extends="_base">
+                <property name="id" fetchPlan="_instance_name"/>
+                <property name="classifier" fetchPlan="_instance_name"/>
+            </fetchPlan>
+            <loader/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="priceTblDc">
+            <entityPicker id="classifierField" property="classifier">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <textField id="closeField" property="close"/>
+            <dateTimePicker id="createTimeField" property="createTime"/>
+            <textField id="highField" property="high"/>
+            <textField id="lowField" property="low"/>
+            <textField id="openField" property="open"/>
+            <dateTimePicker id="updateTimeField" property="updateTime"/>
+            <textField id="volumeField" property="volume"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseBtn" action="saveAction"/>
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

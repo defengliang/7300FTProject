@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://evalTblListView.title"
+      focusComponent="evalTblsDataGrid">
+    <data>
+        <collection id="evalTblsDc"
+                    class="hk.edu.hkbu.ftproject.entity.EvalTbl">
+            <fetchPlan extends="_base">
+                <property name="id" fetchPlan="_instance_name"/>
+                <property name="classifier"/>
+                <property name="target"/>
+            </fetchPlan>
+            <loader id="evalTblsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ftp_EvalTbl e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <genericFilter id="genericFilter"
+                       dataLoader="evalTblsDl">
+            <properties include=".*"/>
+        </genericFilter>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="createBtn" action="evalTblsDataGrid.create"/>
+            <button id="editBtn" action="evalTblsDataGrid.edit"/>
+            <button id="removeBtn" action="evalTblsDataGrid.remove"/>
+            <simplePagination id="pagination" dataLoader="evalTblsDl"/>
+        </hbox>
+        <dataGrid id="evalTblsDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="evalTblsDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="create" type="list_create"/>
+                <action id="edit" type="list_edit"/>
+                <action id="remove" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="classifier"/>
+                <column property="createTime"/>
+                <column property="dac"/>
+                <column property="mae"/>
+                <column property="mape"/>
+                <column property="mse"/>
+                <column property="n"/>
+                <column property="rae"/>
+                <column property="rmse"/>
+                <column property="rrse"/>
+                <column property="target"/>
+                <column property="updateTime"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectBtn" action="selectAction"/>
+            <button id="discardBtn" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

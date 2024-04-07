@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns="http://jmix.io/schema/rest/services">
+    <service name="stockDataService">
+        <method name="fetchQuote">
+            <param name="symbol"/>
+            <param name="startDate"/>
+            <param name="endDate"/>
+        </method>
+    </service>
+</services>

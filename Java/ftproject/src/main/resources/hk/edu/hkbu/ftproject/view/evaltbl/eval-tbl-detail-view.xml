@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://evalTblDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="evalTblDc"
+                  class="hk.edu.hkbu.ftproject.entity.EvalTbl">
+            <fetchPlan extends="_base">
+                <property name="id" fetchPlan="_instance_name"/>
+                <property name="classifier"/>
+                <property name="target"/>
+            </fetchPlan>
+            <loader/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="evalTblDc">
+            <entityPicker id="classifierField" property="classifier">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <dateTimePicker id="createTimeField" property="createTime"/>
+            <textField id="dacField" property="dac"/>
+            <textField id="maeField" property="mae"/>
+            <textField id="mapeField" property="mape"/>
+            <textField id="mseField" property="mse"/>
+            <textField id="nField" property="n"/>
+            <textField id="raeField" property="rae"/>
+            <textField id="rmseField" property="rmse"/>
+            <textField id="rrseField" property="rrse"/>
+            <entityPicker id="targetField" property="target">
+                <actions>
+                    <action id="entityLookup" type="entity_lookup"/>
+                    <action id="entityClear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <dateTimePicker id="updateTimeField" property="updateTime"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseBtn" action="saveAction"/>
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -1,0 +1,115 @@
+---
+- # ====== Build Option: Commented Out =========================
+  id: 9357388139445654
+  identification: 
+    name: Commented Out
+
+  status: 
+    status: Exclude
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+- # ====== Build Option: Feature: Access Control ===============
+  id: 9644739769445787
+  identification: 
+    name: 'Feature: Access Control'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: Incorporate role based user authentication within your application and manage username mappings to application roles.
+
+- # ====== Build Option: Feature: Activity Reporting ===========
+  id: 9644877694445787
+  identification: 
+    name: 'Feature: Activity Reporting'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: Include numerous reports and charts on end user activity.
+
+- # ====== Build Option: Feature: Feedback =====================
+  id: 9644961774445787
+  identification: 
+    name: 'Feature: Feedback'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: Provide a mechanism for end users to post general comments back to the application administrators and developers.
+
+- # ====== Build Option: Feature: Configuration Options ========
+  id: 9645195302445787
+  identification: 
+    name: 'Feature: Configuration Options'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: Allow application administrators to enable or disable specific functionality, associated with an Oracle APEX build option, from within the application.
+
+- # ====== Build Option: Feature: About Page ===================
+  id: 9645422383445787
+  identification: 
+    name: 'Feature: About Page'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: About this application page.
+
+- # ====== Build Option: Feature: Theme Style Selection ========
+  id: 9645559145445787
+  identification: 
+    name: 'Feature: Theme Style Selection'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: 'Allow administrators to select a default color scheme (theme style) for the application. Administrators can also choose to allow end users to choose their own theme style. '
+
+- # ====== Build Option: Feature: Push Notifications ===========
+  id: 9847934764446072
+  identification: 
+    name: 'Feature: Push Notifications'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: Allow users to subscribe to push notifications on their devices.
+
+- # ====== Build Option: Feature: User Settings ================
+  id: 9848274513446072
+  identification: 
+    name: 'Feature: User Settings'
+
+  status: 
+    status: Include
+    default-on-export: Same as Current Status
+    on-upgrade-keep-status: false
+
+  comments: 
+    comments: The user settings page is a drawer that links to all user settings pages.
+

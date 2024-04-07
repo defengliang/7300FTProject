@@ -1,0 +1,231 @@
+prompt --application/pages/page_00006
+begin
+--   Manifest
+--     PAGE: 00006
+--   Manifest End
+wwv_flow_imp.component_begin (
+ p_version_yyyy_mm_dd=>'2023.04.28'
+,p_release=>'23.1.0'
+,p_default_workspace_id=>100003
+,p_default_application_id=>104
+,p_default_id_offset=>0
+,p_default_owner=>'FTPROJECT'
+);
+wwv_flow_imp_page.create_page(
+ p_id=>6
+,p_name=>'Stock Price'
+,p_alias=>'STOCK-PRICE'
+,p_step_title=>'Stock Price'
+,p_autocomplete_on_off=>'OFF'
+,p_page_template_options=>'#DEFAULT#'
+,p_protection_level=>'C'
+,p_page_component_map=>'04'
+,p_last_updated_by=>'ADMIN'
+,p_last_upd_yyyymmddhh24miss=>'20240406171552'
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(6736585746794808)
+,p_plug_name=>'Search'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_imp.id(9461276336445699)
+,p_plug_display_sequence=>20
+,p_plug_display_point=>'REGION_POSITION_01'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(11154983787245191)
+,p_plug_name=>'Breadcrumb'
+,p_region_template_options=>'#DEFAULT#:t-BreadcrumbRegion--useBreadcrumbTitle'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_imp.id(9473634090445701)
+,p_plug_display_sequence=>10
+,p_plug_display_point=>'REGION_POSITION_01'
+,p_menu_id=>wwv_flow_imp.id(9357999485445656)
+,p_plug_source_type=>'NATIVE_BREADCRUMB'
+,p_menu_template_id=>wwv_flow_imp.id(9536004203445722)
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(11155528566245192)
+,p_plug_name=>'Stock Price'
+,p_region_template_options=>'#DEFAULT#'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_imp.id(9451483894445697)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_translate_title=>'N'
+,p_plug_display_condition_type=>'ITEM_IS_NOT_NULL'
+,p_plug_display_when_condition=>'P6_END_DATE'
+,p_plug_customized=>'1'
+);
+wwv_flow_imp_page.create_jet_chart(
+ p_id=>wwv_flow_imp.id(6738259145794825)
+,p_region_id=>wwv_flow_imp.id(11155528566245192)
+,p_chart_type=>'line'
+,p_title=>'Actual and Predict Prices'
+,p_animation_on_display=>'zoom'
+,p_animation_on_data_change=>'auto'
+,p_orientation=>'vertical'
+,p_data_cursor=>'on'
+,p_data_cursor_behavior=>'smooth'
+,p_hide_and_show_behavior=>'withRescale'
+,p_hover_behavior=>'none'
+,p_stack=>'on'
+,p_connect_nulls=>'Y'
+,p_sorting=>'label-asc'
+,p_fill_multi_series_gaps=>true
+,p_zoom_and_scroll=>'liveScrollOnly'
+,p_initial_zooming=>'last'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>true
+,p_show_value=>true
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_overview_rendered=>'on'
+,p_time_axis_type=>'mixedFrequency'
+);
+wwv_flow_imp_page.create_jet_chart_series(
+ p_id=>wwv_flow_imp.id(6738327429794826)
+,p_chart_id=>wwv_flow_imp.id(6738259145794825)
+,p_seq=>10
+,p_name=>'Close Price'
+,p_data_source_type=>'SQL'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select trade_date,',
+'   CLOSE_PRICE',
+'  from HIS_QUOTE',
+'where Trade_date >= TO_DATE(:P6_START_DATE, ''MM/DD/YYYY'') and Trade_date < TO_DATE(:P6_END_DATE, ''MM/DD/YYYY'')'))
+,p_max_row_count=>10000
+,p_ajax_items_to_submit=>'P6_START_DATE'
+,p_items_value_column_name=>'CLOSE_PRICE'
+,p_group_name_column_name=>'CLOSE_PRICE'
+,p_group_short_desc_column_name=>'CLOSE_PRICE'
+,p_items_label_column_name=>'TRADE_DATE'
+,p_color=>'#dd3232'
+,p_line_style=>'solid'
+,p_line_width=>1
+,p_line_type=>'auto'
+,p_marker_rendered=>'on'
+,p_marker_shape=>'star'
+,p_assigned_to_y2=>'on'
+,p_items_label_rendered=>true
+,p_items_label_position=>'aboveMarker'
+);
+wwv_flow_imp_page.create_jet_chart_axis(
+ p_id=>wwv_flow_imp.id(6738892959794831)
+,p_chart_id=>wwv_flow_imp.id(6738259145794825)
+,p_axis=>'y2'
+,p_is_rendered=>'on'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'off'
+,p_tick_label_rendered=>'on'
+,p_split_dual_y=>'auto'
+);
+wwv_flow_imp_page.create_jet_chart_axis(
+ p_id=>wwv_flow_imp.id(6738429987794827)
+,p_chart_id=>wwv_flow_imp.id(6738259145794825)
+,p_axis=>'x'
+,p_is_rendered=>'on'
+,p_title=>'Date'
+,p_format_type=>'date-short'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'min'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'on'
+,p_tick_label_rendered=>'on'
+,p_tick_label_rotation=>'auto'
+,p_tick_label_position=>'inside'
+);
+wwv_flow_imp_page.create_jet_chart_axis(
+ p_id=>wwv_flow_imp.id(6738500711794828)
+,p_chart_id=>wwv_flow_imp.id(6738259145794825)
+,p_axis=>'y'
+,p_is_rendered=>'on'
+,p_title=>'Price'
+,p_format_type=>'decimal'
+,p_decimal_places=>0
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'on'
+,p_minor_step=>3
+,p_tick_label_rendered=>'on'
+);
+wwv_flow_imp_page.create_page_button(
+ p_id=>wwv_flow_imp.id(6736808622794811)
+,p_button_sequence=>60
+,p_button_plug_id=>wwv_flow_imp.id(6736585746794808)
+,p_button_name=>'Search'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_imp.id(9534462424445721)
+,p_button_image_alt=>'Search'
+,p_button_position=>'PREVIOUS'
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(6736734524794810)
+,p_name=>'P6_SYMBOL'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_imp.id(6736585746794808)
+,p_item_display_point=>'PREVIOUS'
+,p_prompt=>'Symbol'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>'select symbol, name from stock_csv_link'
+,p_lov_display_null=>'YES'
+,p_cHeight=>1
+,p_field_template=>wwv_flow_imp.id(9532070990445719)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'YES'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(6736952394794812)
+,p_name=>'P6_START_DATE'
+,p_is_required=>true
+,p_item_sequence=>30
+,p_item_plug_id=>wwv_flow_imp.id(6736585746794808)
+,p_item_display_point=>'PREVIOUS'
+,p_prompt=>'Start Date'
+,p_display_as=>'NATIVE_DATE_PICKER_APEX'
+,p_cSize=>30
+,p_field_template=>wwv_flow_imp.id(9532070990445719)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'POPUP'
+,p_attribute_03=>'NONE'
+,p_attribute_06=>'NONE'
+,p_attribute_09=>'N'
+,p_attribute_11=>'Y'
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(6737174525794814)
+,p_name=>'P6_END_DATE'
+,p_is_required=>true
+,p_item_sequence=>40
+,p_item_plug_id=>wwv_flow_imp.id(6736585746794808)
+,p_item_display_point=>'PREVIOUS'
+,p_prompt=>'End Date'
+,p_display_as=>'NATIVE_DATE_PICKER_APEX'
+,p_cSize=>30
+,p_field_template=>wwv_flow_imp.id(9532070990445719)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'POPUP'
+,p_attribute_03=>'NONE'
+,p_attribute_06=>'NONE'
+,p_attribute_09=>'N'
+,p_attribute_11=>'Y'
+);
+wwv_flow_imp.component_end;
+end;
+/
