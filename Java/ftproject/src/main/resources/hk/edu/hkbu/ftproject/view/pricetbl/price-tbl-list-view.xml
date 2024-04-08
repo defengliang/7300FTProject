@@ -50,14 +50,15 @@
                 <action id="remove" type="list_remove"/>
             </actions>
             <columns resizable="true">
+                <column property="id.symbol"/>
+                <column property="id.valueDate"/>
                 <column property="classifier"/>
                 <column property="close"/>
-                <column property="createTime"/>
                 <column property="high"/>
                 <column property="low"/>
                 <column property="open"/>
-                <column property="updateTime"/>
                 <column property="volume"/>
+                <column property="createTime"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions" visible="false">

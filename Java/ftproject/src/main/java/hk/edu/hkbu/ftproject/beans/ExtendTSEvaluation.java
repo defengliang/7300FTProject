@@ -57,7 +57,7 @@ public class ExtendTSEvaluation extends TSEvaluation {
                 if (targetName.equals("OPEN")) {
                     bean.open = prediction.predicted();
                 }
-                if (targetName.equals("CLOSe")) {
+                if (targetName.equals("CLOSE")) {
                     bean.close = prediction.predicted();
                 }
 

@@ -95,6 +95,8 @@ public class StockDataService {
     public void proecess(String symbol, File file) {
 
         System.out.println("process START");
+
+        double testSplitSize = dataManager.load(GlobalSettings.class).id("test_split_size").one().getFloatValue();
         try {
             String arffString = csvToArff(symbol, file);
             updateStatus(symbol, ProcessStatus.PROCESSING);
@@ -126,7 +128,7 @@ public class StockDataService {
             // IBK START
             for ( String classifierName: ClassifierFactory.classifier) {
 
-                ExtendTSEvaluation eval = new ExtendTSEvaluation(instances, 0.3);
+                ExtendTSEvaluation eval = new ExtendTSEvaluation(instances, testSplitSize);
                 eval.setPrimeWindowSize(10);
 
                 eval.setForecastFuture(true);

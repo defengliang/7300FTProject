@@ -51,17 +51,19 @@
                 <action id="remove" type="list_remove"/>
             </actions>
             <columns resizable="true">
+                <column property="id.symbol"/>
                 <column property="classifier"/>
-                <column property="createTime"/>
+                <column property="id.target"/>
+                <column property="n"/>
                 <column property="dac"/>
                 <column property="mae"/>
                 <column property="mape"/>
                 <column property="mse"/>
-                <column property="n"/>
                 <column property="rae"/>
                 <column property="rmse"/>
                 <column property="rrse"/>
                 <column property="target"/>
+                <column property="createTime"/>
                 <column property="updateTime"/>
             </columns>
         </dataGrid>

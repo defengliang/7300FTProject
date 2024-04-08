@@ -28,7 +28,7 @@
                     <action id="entityClear" type="entity_clear"/>
                 </actions>
             </entityPicker>
-            <dateTimePicker id="createTimeField" property="createTime"/>
+
             <textField id="dacField" property="dac"/>
             <textField id="maeField" property="mae"/>
             <textField id="mapeField" property="mape"/>
@@ -43,6 +43,7 @@
                     <action id="entityClear" type="entity_clear"/>
                 </actions>
             </entityPicker>
+            <dateTimePicker id="createTimeField" property="createTime"/>
             <dateTimePicker id="updateTimeField" property="updateTime"/>
         </formLayout>
         <hbox id="detailActions">
