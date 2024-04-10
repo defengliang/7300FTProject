@@ -24,3 +24,26 @@ It contains an Oracle APEX application.
 ### Demo folder
 
 The folder to store the file and PPTs used in demo.
+
+## How to run.
+
+### Install Virtual Box
+VirtualBox can be downloaded from URL below.
+https://www.virtualbox.org
+
+### Import OVA
+Download the OVA file from the URL provided.
+
+### Start VM
+Open virtual box, Import Virtual Appliance, choose the ova file and import the VM.
+After import, start the VM
+
+### Access
+Once the VM has started, open
+
+http://localhost:7070/
+username/password: admin/admin
+
+http://localhost:8080/ords/r/ftproject/ftapp/interactive-report
+http://localhost:8080/ords/r/ftproject/ftapp/evaluation-interactive-report
+
