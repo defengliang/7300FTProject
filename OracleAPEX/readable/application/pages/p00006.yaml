@@ -131,6 +131,11 @@ regions:
     title: Stock Price
     type: Chart
 
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: "select value_date, classifier, open,high,low,close from price_tbl where symbol = 'AAPL' and value_date >= to_date(:P6_START_DATE, 'MM/DD/YYYY')"
+
   layout: 
     sequence: 10
     parent-region: No Parent
@@ -214,50 +219,67 @@ regions:
       hide-and-show-behavior: Rescale
 
     series: 
-    - # ====== Series: Close Price =================================
-      id: 6738327429794826
+    - # ====== Series: High ========================================
+      id: 6739287889794835
       identification: 
-        name: Close Price
+        name: High
 
       execution: 
-        sequence: 10
+        sequence: 20
 
       source: 
-        location: Local Database
-        type: SQL Query
-        sql-query: |
-          select trade_date,
-             CLOSE_PRICE
-            from HIS_QUOTE
-          where Trade_date >= TO_DATE(:P6_START_DATE, 'MM/DD/YYYY') and Trade_date < TO_DATE(:P6_END_DATE, 'MM/DD/YYYY')
-        page-items-to-submit: 
-        - P6_START_DATE
+        location: Region Source
 
       column-mapping: 
-        label: TRADE_DATE
-        value: CLOSE_PRICE
-        legend-tooltip: CLOSE_PRICE
-        label-tooltip: CLOSE_PRICE
+        series-name: CLASSIFIER
+        label: VALUE_DATE
+        value-aggregation: No Aggregation
+        value: HIGH
 
       appearance: 
-        color: '#dd3232'
-        assigned-to-y2-axis: true
+        assigned-to-y2-axis: false
 
       line: 
         style: Solid
-        width: 1
         type: Automatic
 
       marker: 
-        show: Yes
-        shape: Star
+        show: Automatic
+        shape: Automatic
 
       label: 
-        show: true
-        position: Above Marker
+        show: false
 
-      performance: 
-        maximum-rows-to-process: 10000
+    - # ====== Series: Open ========================================
+      id: 6739351512794836
+      identification: 
+        name: Open
+
+      execution: 
+        sequence: 30
+
+      source: 
+        location: Region Source
+
+      column-mapping: 
+        series-name: CLASSIFIER
+        label: VALUE_DATE
+        value-aggregation: No Aggregation
+        value: OPEN
+
+      appearance: 
+        assigned-to-y2-axis: false
+
+      line: 
+        style: Solid
+        type: Automatic
+
+      marker: 
+        show: Automatic
+        shape: Automatic
+
+      label: 
+        show: false
 
     axes: 
     - # ====== Axis: x =============================================
@@ -338,65 +360,6 @@ regions:
         show: Automatic
 
 page-items: 
-- # ====== Page Item: P6_SYMBOL ================================
-  id: 6736734524794810
-  identification: 
-    name: P6_SYMBOL
-    type: Select List
-
-  label: 
-    label: Symbol
-    alignment: Left
-
-  settings: 
-    page-action-on-selection: None
-    allow-multi-selection: false
-
-  layout: 
-    sequence: 20
-    region: Search # 6736585746794808
-    position: PREVIOUS
-    alignment: Left
-    start-new-layout: false
-    start-new-row: true
-    column: Automatic
-    new-column: true
-    column-span: Automatic
-    label-column-span: Page Template Default
-
-  appearance: 
-    template: Required # 9532070990445719
-    template-options: 
-    - '#DEFAULT#'
-    height: 1
-
-  validation: 
-    value-required: false
-
-  list-of-values: 
-    type: SQL Query
-    sql-query: select symbol, name from stock_csv_link
-    display-extra-values: true
-    display-null-value: true
-
-  advanced: 
-    warn-on-unsaved-changes: Page Default
-
-  source: 
-    type: Null
-    used: Only when current value in session state is null
-
-  session-state: 
-    storage: Per Session (Persistent)
-
-  quick-picks: 
-    show-quick-picks: false
-
-  security: 
-    session-state-protection: Unrestricted
-    store-value-encrypted-in-session-state: true
-    restricted-characters: All characters can be saved.
-
 - # ====== Page Item: P6_START_DATE ============================
   id: 6736952394794812
   identification: 

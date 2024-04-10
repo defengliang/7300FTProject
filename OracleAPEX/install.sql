@@ -29,6 +29,7 @@ prompt --install
 @@application/shared_components/navigation/tabs/standard.sql
 @@application/shared_components/navigation/tabs/parent.sql
 @@application/shared_components/user_interface/lovs/access_roles.sql
+@@application/shared_components/user_interface/lovs/classifier_tbl_description.sql
 @@application/shared_components/user_interface/lovs/desktop_theme_styles.sql
 @@application/shared_components/user_interface/lovs/email_username_format.sql
 @@application/shared_components/user_interface/lovs/feedback_rating.sql
@@ -131,9 +132,13 @@ prompt --install
 @@application/user_interfaces/combined_files.sql
 @@application/pages/page_00000.sql
 @@application/pages/page_00001.sql
+@@application/pages/page_00002.sql
+@@application/pages/page_00003.sql
 @@application/pages/page_00004.sql
 @@application/pages/page_00005.sql
 @@application/pages/page_00006.sql
+@@application/pages/page_00007.sql
+@@application/pages/page_00013.sql
 @@application/pages/page_09999.sql
 @@application/pages/page_10000.sql
 @@application/pages/page_10010.sql

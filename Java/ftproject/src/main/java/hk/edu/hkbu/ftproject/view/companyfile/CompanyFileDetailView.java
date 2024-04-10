@@ -79,7 +79,6 @@ public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
         } else {
             this.statusField.setVisible(false);
             this.statusField.setValue(ProcessStatus.DRAFT);
-            this.statusField.setValue(false);
             this.symbolField.setEnabled(true);
         }
 
@@ -92,14 +91,17 @@ public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
     @Subscribe("fileField")
     public void onFileFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileStorageUploadField> event) {
 
+        if (symbolField.getValue() != null
+                && !symbolField.getValue().equals("")
+                && event.getReceiver() instanceof FileTemporaryStorageBuffer buffer) {
+            File file = buffer.getFileData().getFileInfo().getFile();
+            fileField.setValue(null);
+            filePathField.setValue("filePath");
+            fileNameField.setValue("fileName");
 
-        if (event.getReceiver() instanceof FileTemporaryStorageBuffer buffer) {
-            UUID fileId = buffer.getFileData().getFileInfo().getId();
-            File file = temporaryStorage.getFile(fileId);
             if (file != null) {
 
                 statusField.setValue(ProcessStatus.PROCESSING);
-
                 BackgroundTaskHandler taskHandler = backgroundWorker.handle(new BackgroundTask<Integer, Void>(7200) {
                     @Override
                     public Void run(TaskLifeCycle<Integer> taskLifeCycle) {
@@ -108,11 +110,6 @@ public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
                     }
                 });
                 taskHandler.execute();
-
-                FileRef fileRef = temporaryStorage.putFileIntoStorage(fileId, event.getFileName());
-                fileField.setValue(fileRef);
-                filePathField.setValue(fileRef.toString());
-                fileNameField.setValue(fileRef.getFileName());
             }
         }
     }

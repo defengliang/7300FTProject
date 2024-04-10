@@ -1,0 +1,205 @@
+prompt --application/pages/page_00013
+begin
+--   Manifest
+--     PAGE: 00013
+--   Manifest End
+wwv_flow_imp.component_begin (
+ p_version_yyyy_mm_dd=>'2023.04.28'
+,p_release=>'23.1.0'
+,p_default_workspace_id=>100003
+,p_default_application_id=>104
+,p_default_id_offset=>0
+,p_default_owner=>'FTPROJECT'
+);
+wwv_flow_imp_page.create_page(
+ p_id=>13
+,p_name=>'Evaluation Interactive Report'
+,p_alias=>'EVALUATION-INTERACTIVE-REPORT'
+,p_step_title=>'Evaluation Interactive Report'
+,p_autocomplete_on_off=>'OFF'
+,p_page_template_options=>'#DEFAULT#'
+,p_protection_level=>'C'
+,p_page_component_map=>'18'
+,p_last_updated_by=>'ADMIN'
+,p_last_upd_yyyymmddhh24miss=>'20240410144711'
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(13580636605396968)
+,p_plug_name=>'Breadcrumb'
+,p_region_template_options=>'#DEFAULT#:t-BreadcrumbRegion--useBreadcrumbTitle'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_imp.id(9473634090445701)
+,p_plug_display_sequence=>10
+,p_plug_display_point=>'REGION_POSITION_01'
+,p_menu_id=>wwv_flow_imp.id(9357999485445656)
+,p_plug_source_type=>'NATIVE_BREADCRUMB'
+,p_menu_template_id=>wwv_flow_imp.id(9536004203445722)
+);
+wwv_flow_imp_page.create_page_plug(
+ p_id=>wwv_flow_imp.id(13581213947396968)
+,p_plug_name=>'Evaluation Interactive Report'
+,p_region_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_imp.id(9451483894445697)
+,p_plug_display_sequence=>10
+,p_query_type=>'SQL'
+,p_plug_source=>'select symbol, classifier, target, N, MAE, MSE, RMSE, MAPE, DAC,RAE, RRSE from eval_tbl '
+,p_plug_source_type=>'NATIVE_IR'
+,p_prn_page_header=>'Evaluation Interactive Report'
+);
+wwv_flow_imp_page.create_worksheet(
+ p_id=>wwv_flow_imp.id(13581363195396968)
+,p_name=>'Evaluation Interactive Report'
+,p_max_row_count_message=>'The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.'
+,p_no_data_found_message=>'No data found.'
+,p_pagination_type=>'ROWS_X_TO_Y'
+,p_pagination_display_pos=>'BOTTOM_RIGHT'
+,p_report_list_mode=>'TABS'
+,p_lazy_loading=>false
+,p_show_detail_link=>'N'
+,p_show_notify=>'Y'
+,p_download_formats=>'CSV:HTML:XLSX:PDF'
+,p_enable_mail_download=>'Y'
+,p_owner=>'ADMIN'
+,p_internal_uid=>13581363195396968
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13581797814396969)
+,p_db_column_name=>'SYMBOL'
+,p_display_order=>1
+,p_column_identifier=>'A'
+,p_column_label=>'Symbol'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13582154491396969)
+,p_db_column_name=>'CLASSIFIER'
+,p_display_order=>2
+,p_column_identifier=>'B'
+,p_column_label=>'Classifier'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13582575873396969)
+,p_db_column_name=>'TARGET'
+,p_display_order=>3
+,p_column_identifier=>'C'
+,p_column_label=>'Target'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13582991800396969)
+,p_db_column_name=>'N'
+,p_display_order=>4
+,p_column_identifier=>'D'
+,p_column_label=>'N'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13583308951396969)
+,p_db_column_name=>'MAE'
+,p_display_order=>5
+,p_column_identifier=>'E'
+,p_column_label=>'Mae'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13583787854396970)
+,p_db_column_name=>'MSE'
+,p_display_order=>6
+,p_column_identifier=>'F'
+,p_column_label=>'Mse'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13584120052396970)
+,p_db_column_name=>'RMSE'
+,p_display_order=>7
+,p_column_identifier=>'G'
+,p_column_label=>'Rmse'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13584540504396970)
+,p_db_column_name=>'MAPE'
+,p_display_order=>8
+,p_column_identifier=>'H'
+,p_column_label=>'Mape'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13584922755396970)
+,p_db_column_name=>'DAC'
+,p_display_order=>9
+,p_column_identifier=>'I'
+,p_column_label=>'Dac'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13585364056396970)
+,p_db_column_name=>'RAE'
+,p_display_order=>10
+,p_column_identifier=>'J'
+,p_column_label=>'Rae'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(13585710219396970)
+,p_db_column_name=>'RRSE'
+,p_display_order=>11
+,p_column_identifier=>'K'
+,p_column_label=>'Rrse'
+,p_column_type=>'NUMBER'
+,p_heading_alignment=>'RIGHT'
+,p_column_alignment=>'RIGHT'
+,p_tz_dependent=>'N'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_rpt(
+ p_id=>wwv_flow_imp.id(13586312067399489)
+,p_application_user=>'APXWS_DEFAULT'
+,p_report_seq=>10
+,p_report_alias=>'135864'
+,p_status=>'PUBLIC'
+,p_is_default=>'Y'
+,p_report_columns=>'SYMBOL:CLASSIFIER:TARGET:N:MAE:MSE:RMSE:MAPE:DAC:RAE:RRSE'
+);
+wwv_flow_imp.component_end;
+end;
+/

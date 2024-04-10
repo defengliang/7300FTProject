@@ -46,8 +46,8 @@
             </actions>
             <columns resizable="true">
                 <column property="symbol"/>
-                <column property="filePath"/>
-                <column property="fileName"/>
+                <column property="filePath" visible="false"/>
+                <column property="fileName" visible="false"/>
                 <column property="status"/>
             </columns>
         </dataGrid>

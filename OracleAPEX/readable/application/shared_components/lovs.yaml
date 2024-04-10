@@ -197,3 +197,20 @@
       display: Closed
       return: 4
 
+- # ====== List of Values: CLASSIFIER_TBL.DESCRIPTION ==========
+  id: 12965860360119334
+  identification: 
+    name: CLASSIFIER_TBL.DESCRIPTION
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: CLASSIFIER_TBL
+
+  column-mapping: 
+    return: NAME
+    display: DESCRIPTION
+    default-sort: DESCRIPTION
+    sort-direction: Ascending (Nulls Last)
+

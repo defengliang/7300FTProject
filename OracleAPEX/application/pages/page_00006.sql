@@ -21,7 +21,7 @@ wwv_flow_imp_page.create_page(
 ,p_protection_level=>'C'
 ,p_page_component_map=>'04'
 ,p_last_updated_by=>'ADMIN'
-,p_last_upd_yyyymmddhh24miss=>'20240406171552'
+,p_last_upd_yyyymmddhh24miss=>'20240408123429'
 );
 wwv_flow_imp_page.create_page_plug(
  p_id=>wwv_flow_imp.id(6736585746794808)
@@ -53,6 +53,8 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_template=>wwv_flow_imp.id(9451483894445697)
 ,p_plug_display_sequence=>10
 ,p_include_in_reg_disp_sel_yn=>'Y'
+,p_query_type=>'SQL'
+,p_plug_source=>'select value_date, classifier, open,high,low,close from price_tbl where symbol = ''AAPL'' and value_date >= to_date(:P6_START_DATE, ''MM/DD/YYYY'')'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_translate_title=>'N'
 ,p_plug_display_condition_type=>'ITEM_IS_NOT_NULL'
@@ -87,31 +89,36 @@ wwv_flow_imp_page.create_jet_chart(
 ,p_time_axis_type=>'mixedFrequency'
 );
 wwv_flow_imp_page.create_jet_chart_series(
- p_id=>wwv_flow_imp.id(6738327429794826)
+ p_id=>wwv_flow_imp.id(6739287889794835)
 ,p_chart_id=>wwv_flow_imp.id(6738259145794825)
-,p_seq=>10
-,p_name=>'Close Price'
-,p_data_source_type=>'SQL'
-,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select trade_date,',
-'   CLOSE_PRICE',
-'  from HIS_QUOTE',
-'where Trade_date >= TO_DATE(:P6_START_DATE, ''MM/DD/YYYY'') and Trade_date < TO_DATE(:P6_END_DATE, ''MM/DD/YYYY'')'))
-,p_max_row_count=>10000
-,p_ajax_items_to_submit=>'P6_START_DATE'
-,p_items_value_column_name=>'CLOSE_PRICE'
-,p_group_name_column_name=>'CLOSE_PRICE'
-,p_group_short_desc_column_name=>'CLOSE_PRICE'
-,p_items_label_column_name=>'TRADE_DATE'
-,p_color=>'#dd3232'
+,p_seq=>20
+,p_name=>'High'
+,p_location=>'REGION_SOURCE'
+,p_series_name_column_name=>'CLASSIFIER'
+,p_items_value_column_name=>'HIGH'
+,p_items_label_column_name=>'VALUE_DATE'
 ,p_line_style=>'solid'
-,p_line_width=>1
 ,p_line_type=>'auto'
-,p_marker_rendered=>'on'
-,p_marker_shape=>'star'
-,p_assigned_to_y2=>'on'
-,p_items_label_rendered=>true
-,p_items_label_position=>'aboveMarker'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_imp_page.create_jet_chart_series(
+ p_id=>wwv_flow_imp.id(6739351512794836)
+,p_chart_id=>wwv_flow_imp.id(6738259145794825)
+,p_seq=>30
+,p_name=>'Open'
+,p_location=>'REGION_SOURCE'
+,p_series_name_column_name=>'CLASSIFIER'
+,p_items_value_column_name=>'OPEN'
+,p_items_label_column_name=>'VALUE_DATE'
+,p_line_style=>'solid'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
 );
 wwv_flow_imp_page.create_jet_chart_axis(
  p_id=>wwv_flow_imp.id(6738892959794831)
@@ -170,23 +177,6 @@ wwv_flow_imp_page.create_page_button(
 ,p_button_template_id=>wwv_flow_imp.id(9534462424445721)
 ,p_button_image_alt=>'Search'
 ,p_button_position=>'PREVIOUS'
-);
-wwv_flow_imp_page.create_page_item(
- p_id=>wwv_flow_imp.id(6736734524794810)
-,p_name=>'P6_SYMBOL'
-,p_item_sequence=>20
-,p_item_plug_id=>wwv_flow_imp.id(6736585746794808)
-,p_item_display_point=>'PREVIOUS'
-,p_prompt=>'Symbol'
-,p_display_as=>'NATIVE_SELECT_LIST'
-,p_lov=>'select symbol, name from stock_csv_link'
-,p_lov_display_null=>'YES'
-,p_cHeight=>1
-,p_field_template=>wwv_flow_imp.id(9532070990445719)
-,p_item_template_options=>'#DEFAULT#'
-,p_lov_display_extra=>'YES'
-,p_attribute_01=>'NONE'
-,p_attribute_02=>'N'
 );
 wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(6736952394794812)
