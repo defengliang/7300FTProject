@@ -41,9 +41,14 @@ After import, start the VM
 ### Access
 Once the VM has started, open
 
-http://localhost:7070/
+http://openai.asuscomm.com:7070/
 username/password: admin/admin
 
 http://localhost:8080/ords/r/ftproject/ftapp/interactive-report
 http://localhost:8080/ords/r/ftproject/ftapp/evaluation-interactive-report
 
+http://openai.asuscomm.com:7070
+
+http://openai.asuscomm.com:8080/ords/r/ftproject/ftapp/interactive-report
+
+http://openai.asuscomm.com:8080/ords/r/ftproject/ftapp/evaluation-interactive-report

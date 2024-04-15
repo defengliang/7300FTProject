@@ -7,28 +7,30 @@ public class Main {
 
     public static void main(String[] args) {
 
-        if (args.length == 1) {
+        if (args.length >= 1) {
             String e = args[0];
             YahooFinancier yf = new YahooFinancier(e);
             yf.generateFile();
             yf.generateFile2();
+            System.out.println("Files generated!");
+        } else {
+            Arrays.stream(new String[]{
+//                    "AMD",
+//                    "F",
+//                    "GD",
+//                    "GE",
+//                    "T",
+//                    "MCD",
+//                    "GD",
+//                    "LMT",
+//                    "RTX",
+                    "AAPL",
+            }).forEach(e -> {
+                YahooFinancier yf = new YahooFinancier(e);
+                yf.generateFile();
+                yf.generateFile2();
+                System.out.println("Files generated!");
+            });
         }
-//        String[] stocks = new String[] {
-//
-//                "AMD",
-//                "F",
-//                "GD",
-//                "GE",
-//                "T",
-//                "MCD",
-//                "GD",
-//                "LMT",
-//                "RTX",
-//                "AAPL",
-//        };
-//        Arrays.stream(stocks).forEach( e -> {
-
-//        });
-
     }
 }

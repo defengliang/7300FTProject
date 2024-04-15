@@ -80,7 +80,6 @@ public class YahooFinancier  {
             if (fout != null) {
                 fout.close();
             }
-            System.out.println(filename);
         }
     }
 
