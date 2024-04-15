@@ -173,6 +173,144 @@ public class YahooFinancier  {
     }
 
 
+    public void generateFile2() {
+
+        int lineNum = 0;
+        String line;
+
+        List<String[]> outputList = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(this.outputFileName))) {
+
+            String[] data_2 = null;
+            String[] data_1 = null;
+            String[] lineArray;
+
+            while ((line = br.readLine()) != null) {
+
+                if (lineNum == 0) {
+                    lineNum++;
+                    continue;
+                }
+
+                lineArray = new String[6];
+
+                boolean continueFlag = false;
+                String[] data = line.split(",");
+                for (String s: data) {
+                    if (null == s || s.equals("")) {
+                        continueFlag = true;
+                    }
+                }
+
+                if (continueFlag || data.length != 7) continue;
+
+                if (lineNum == 1) {
+                    lineNum++;
+                    data_1 = data;
+                    continue;
+                }
+
+                if (lineNum == 2) {
+                    lineNum++;
+                    data_2 = data_1;
+                    data_1 = data;
+                    continue;
+                }
+
+                if ((Double.parseDouble(data_1[1])
+                        * Double.parseDouble(data_2[2])
+                        * Double.parseDouble(data_2[3])
+                        * Double.parseDouble(data_2[4])) == 0) {
+                    lineNum++;
+                    continue;
+                }
+
+                String dateStr = data[0];
+                String openStr = getRel(data[1], data_1[1]);
+                String highStr = getRel(data_1[2], data_2[2]);
+                String lowStr = getRel(data_1[3], data_2[3]);
+                String closeStr = getRel(data_1[4], data_2[4]);
+
+                lineArray[0] = daysSince1970(stringToDate(dateStr)) + ""; // Date;
+                lineArray[1] = openStr;
+                lineArray[2] = highStr;
+                lineArray[3] = lowStr;
+                lineArray[4] = closeStr;
+
+                // Flag
+                Double open = Double.parseDouble(data[1]);
+                Double close = Double.parseDouble(data[4]);
+
+                if (close > open) {
+                    lineArray[5] = "1";
+                } else {
+                    lineArray[5] = "0"; // FLAG
+                }
+
+                outputList.add(lineArray);
+                data_2 = data_1;
+                data_1 = data;
+                lineNum++;
+            }
+
+            FileWriter writer = getFileWriter2(outputList);
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private FileWriter getFileWriter2(List<String[]> outputList) throws IOException {
+        File file = new File(this.stockSymbol + "_rel.arff");
+        FileWriter writer = new FileWriter(file);
+
+        String header =
+                "@relation " + this.stockSymbol + "\n" + """
+@attribute 'Date' numeric
+@attribute 'Open' numeric
+@attribute 'High' numeric
+@attribute 'Low' numeric
+@attribute 'Close' numeric
+@attribute class-att {0, 1}
+
+@data\n""";
+
+        writer.write(header);
+        int k = 0;
+        for (String[] array: outputList) {
+
+            boolean first = true;
+            int i = 0;
+            for (String s: array) {
+
+                if (!first) {
+                    writer.write(",");
+                }
+
+                writer.write(s);
+                first = false;
+                i++;
+            }
+
+            writer.write("\n");
+
+            k++;
+        }
+        return writer;
+    }
+
+    private String getRel(String current, String previous) {
+
+        if (previous == null || current == null) return "0";
+
+        return (double) (Double.parseDouble(current) - Double.parseDouble(previous)) / Double.parseDouble(previous)
+                + "";
+
+    }
+
 
     public void generateFile() {
 
@@ -189,6 +327,7 @@ public class YahooFinancier  {
             String previousHigh = null;
             String previousLow = null;
             String previousClose = null;
+
             Deque<Double> openDeque = new LinkedList<>();
 
             while ((line = br.readLine()) != null) {
@@ -214,40 +353,41 @@ public class YahooFinancier  {
                 String lowStr = data[3];
                 String closeStr = data[4];
 
+                if ((Double.parseDouble(openStr)
+                        * Double.parseDouble(highStr)
+                        * Double.parseDouble(lowStr)
+                        * Double.parseDouble(closeStr)) == 0) {
+                    continue;
+                }
+
                 openDeque.addFirst(Double.parseDouble(data[1]));
 
                 // Keep
                 if (openDeque.size() == 30) {
 
-                    lineArray = new String[18];
+                    lineArray = new String[12];
 
                     lineArray[0] = daysSince1970(stringToDate(dateStr)) + ""; // Data
-                    lineArray[1] = openStr; // Open
+                    lineArray[1] = toLog(openStr); // Open
 
                     // set index 2 to 7
                     List<Double> maList = calculateMA((List) openDeque);
                     for (int j = 0; j < maList.size(); j++) {
-                        lineArray[2 + j] = maList.get(j) + "";
+                        lineArray[2 + j] = toLog(maList.get(j)) + "";
                     }
 
-                    // set index 8 - 13
-                    List<Double> maSQRTList = calculateSQRTMA((List) openDeque);
-                    for (int j = 0; j < maSQRTList.size(); j++) {
-                        lineArray[8 + j] = maSQRTList.get(j) + "";
-                    }
-
-                    lineArray[14] = previousHigh; // Previous High
-                    lineArray[15] = previousLow;  // Previous Low
-                    lineArray[16] = previousClose; // Previous Close
+                    lineArray[8] = toLog(previousHigh); // Previous High
+                    lineArray[9] = toLog(previousLow);  // Previous Low
+                    lineArray[10] = toLog(previousClose); // Previous Close
 
                     // Flag
                     Double open = Double.parseDouble(openStr);
                     Double close = Double.parseDouble(closeStr);
 
                     if (close > open) {
-                        lineArray[17] = "1";
+                        lineArray[11] = "1";
                     } else {
-                        lineArray[17] = "0"; // FLAG
+                        lineArray[11] = "0"; // FLAG
                     }
 
                     outputList.add(lineArray);
@@ -270,6 +410,14 @@ public class YahooFinancier  {
 
     }
 
+    private String toLog(Double dbl) {
+        return Math.log(dbl) + "";
+    }
+
+    private String toLog(String str) {
+        return Math.log(Double.parseDouble(str)) + "";
+    }
+
     private FileWriter getFileWriter(List<String[]> outputList) throws IOException {
         File file = new File(this.stockSymbol + "_converted.arff");
         FileWriter writer = new FileWriter(file);
@@ -284,15 +432,9 @@ public class YahooFinancier  {
 @attribute 'OpenMA20' numeric
 @attribute 'OpenMA25' numeric
 @attribute 'OpenMA30' numeric
-@attribute 'OpenSQRT05' numeric
-@attribute 'OpenSQRT10' numeric
-@attribute 'OpenSQRT15' numeric
-@attribute 'OpenSQRT20' numeric
-@attribute 'OpenSQRT25' numeric
-@attribute 'OpenSQRT30' numeric
-@attribute 'PreviousHigh' numeric
-@attribute 'PreviousLow' numeric
-@attribute 'PreviousClose' numeric
+@attribute 'prevHigh' numeric
+@attribute 'prevLow' numeric
+@attribute 'prevClose' numeric
 @attribute class-att {0, 1}
 
 @data\n""";
@@ -346,7 +488,6 @@ public class YahooFinancier  {
 @attribute 'LOW' numeric
 @attribute 'CLOSE' numeric
 @attribute 'ADJCLOSE' numeric
-@attribute 'VOLUME' numeric
 
 @data\n""";
         File outputFile = new File(this.stockSymbol + "_raw.arff");
@@ -363,6 +504,7 @@ public class YahooFinancier  {
                 // The first line doesn't need
                 if (lineCount != 0)
                     content.append(line).append("\n");
+
                 lineCount++;
             }
             reader.close();
@@ -379,6 +521,24 @@ public class YahooFinancier  {
             throw new RuntimeException(e);
         }
     }
+
+    private String convertStr(String str) {
+
+        String[] lineArray = str.split(",");
+
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(lineArray[0]);
+        for (int i = 1; i < lineArray.length; i++) {
+            stringBuffer.append(",");
+            stringBuffer.append(logStr(lineArray[i]));
+        }
+        return stringBuffer.toString();
+    }
+
+    private String logStr(String str) {
+        return "" + Math.log(Double.parseDouble(str));
+    }
+
 
     public void downloadFile() {
 
