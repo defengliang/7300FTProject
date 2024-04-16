@@ -15,15 +15,15 @@ public class Main {
             System.out.println("Files generated!");
         } else {
             Arrays.stream(new String[]{
-//                    "AMD",
-//                    "F",
-//                    "GD",
-//                    "GE",
-//                    "T",
-//                    "MCD",
-//                    "GD",
-//                    "LMT",
-//                    "RTX",
+                    "AMD",
+                    "F",
+                    "GD",
+                    "GE",
+                    "T",
+                    "MCD",
+                    "GD",
+                    "LMT",
+                    "RTX",
                     "JOBY",
             }).forEach(e -> {
                 YahooFinancier yf = new YahooFinancier(e);

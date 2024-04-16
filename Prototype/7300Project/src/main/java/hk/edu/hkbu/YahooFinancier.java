@@ -32,7 +32,7 @@ public class YahooFinancier  {
         this.url = returnURL;
 
         setSymbol(symbol);
-        setOutputFileName(symbol + "_stock_info.csv");
+        setOutputFileName(symbol + "_stock_prices.csv");
     }
 
 
@@ -523,7 +523,7 @@ public class YahooFinancier  {
 
 
     private FileWriter getFileWriter1(List<String[]> outputList) throws IOException {
-        File file = new File(this.stockSymbol + "_with_ma.arff");
+        File file = new File(this.stockSymbol + "_ma_sqrtma.arff");
         FileWriter writer = new FileWriter(file);
 
         String header =
@@ -574,7 +574,7 @@ public class YahooFinancier  {
     }
 
     private FileWriter getFileWriter(List<String[]> outputList) throws IOException {
-        File file = new File(this.stockSymbol + "_converted.arff");
+        File file = new File(this.stockSymbol + "_ma.arff");
         FileWriter writer = new FileWriter(file);
 
         String header =
@@ -637,12 +637,14 @@ public class YahooFinancier  {
 
         String header =
                 "@relation " + this.stockSymbol + "\n" + """
-@attribute 'Date' DATE "yyyy-MM-dd"
+@attribute 'Date' numeric
 @attribute 'OPEN' numeric
 @attribute 'HIGH' numeric
 @attribute 'LOW' numeric
 @attribute 'CLOSE' numeric
 @attribute 'ADJCLOSE' numeric
+@attribute 'VOLUME' numeric
+@attribute class-att {0, 1}
 
 @data\n""";
         File outputFile = new File(this.stockSymbol + "_raw.arff");
@@ -658,7 +660,7 @@ public class YahooFinancier  {
 
                 // The first line doesn't need
                 if (lineCount != 0)
-                    content.append(line).append("\n");
+                    content.append(convertStr(line)).append("\n");
 
                 lineCount++;
             }
@@ -682,11 +684,19 @@ public class YahooFinancier  {
         String[] lineArray = str.split(",");
 
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(lineArray[0]);
+
+        stringBuffer.append(daysSince1970(stringToDate(lineArray[0])) + "");
         for (int i = 1; i < lineArray.length; i++) {
             stringBuffer.append(",");
-            stringBuffer.append(logStr(lineArray[i]));
+            stringBuffer.append(lineArray[i]);
         }
+
+        if (Double.parseDouble(lineArray[4]) > Double.parseDouble(lineArray[1])) {
+            stringBuffer.append(",1");
+        } else {
+            stringBuffer.append(",0");
+        }
+
         return stringBuffer.toString();
     }
 
