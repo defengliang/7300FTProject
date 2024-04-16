@@ -12,9 +12,10 @@ public class Main {
             YahooFinancier yf = new YahooFinancier(e);
             yf.generateFile();
             yf.generateFile2();
-            System.out.println("Files generated!");
+            System.out.println("Stock " + e +  "'s files are generated!");
         } else {
             Arrays.stream(new String[]{
+                    "AAPL",
                     "AMD",
                     "F",
                     "GD",
@@ -30,7 +31,7 @@ public class Main {
                 yf.generateFile();
                 yf.generateFile1();
                 yf.generateFile2();
-                System.out.println("Files generated!");
+                System.out.println("Stock " + e +  "'s files are generated!");
             });
         }
     }
