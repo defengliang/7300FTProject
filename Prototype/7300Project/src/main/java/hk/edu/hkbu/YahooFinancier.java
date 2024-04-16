@@ -409,12 +409,168 @@ public class YahooFinancier  {
 
     }
 
+
+
+    public void generateFile1() {
+
+        int lineNum = 0;
+        String line;
+
+        List<String[]> outputList = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(this.outputFileName))) {
+
+            String[] lineArray;
+            String previousHigh = null;
+            String previousLow = null;
+            String previousClose = null;
+
+            Deque<Double> openDeque = new LinkedList<>();
+
+            while ((line = br.readLine()) != null) {
+
+                if (lineNum == 0) {
+                    lineNum++;
+                    continue;
+                }
+
+                boolean continueFlag = false;
+                String[] data = line.split(",");
+                for (String s: data) {
+                    if (null == s || s.equals("")) {
+                        continueFlag = true;
+                    }
+                }
+
+                if (continueFlag || data.length != 7) continue;
+
+                String dateStr = data[0];
+                String openStr = data[1];
+                String highStr = data[2];
+                String lowStr = data[3];
+                String closeStr = data[4];
+
+                if ((Double.parseDouble(openStr)
+                        * Double.parseDouble(highStr)
+                        * Double.parseDouble(lowStr)
+                        * Double.parseDouble(closeStr)) == 0) {
+                    continue;
+                }
+
+                openDeque.addFirst(Double.parseDouble(data[1]));
+
+                // Keep
+                if (openDeque.size() == 30) {
+
+                    lineArray = new String[18];
+
+                    lineArray[0] = daysSince1970(stringToDate(dateStr)) + ""; // Data
+                    lineArray[1] = toLog(openStr); // Open
+
+                    // set index 2 to 7
+                    List<Double> maList = calculateMA((List) openDeque);
+                    for (int j = 0; j < maList.size(); j++) {
+                        lineArray[2 + j] = toLog(maList.get(j)) + "";
+                    }
+
+                    // set index 8 to 13
+                    maList = calculateSQRTMA((List) openDeque);
+                    for (int j = 0; j < maList.size(); j++) {
+                        lineArray[8 + j] = toLog(maList.get(j)) + "";
+                    }
+
+                    lineArray[14] = toLog(previousHigh); // Previous High
+                    lineArray[15] = toLog(previousLow);  // Previous Low
+                    lineArray[16] = toLog(previousClose); // Previous Close
+
+                    // Flag
+                    Double open = Double.parseDouble(openStr);
+                    Double close = Double.parseDouble(closeStr);
+
+                    if (close > open) {
+                        lineArray[17] = "1";
+                    } else {
+                        lineArray[17] = "0"; // FLAG
+                    }
+
+                    outputList.add(lineArray);
+                    openDeque.removeLast();
+                }
+
+                previousHigh = highStr;
+                previousLow = lowStr;
+                previousClose = closeStr;
+
+                lineNum++;
+            }
+
+            FileWriter writer = getFileWriter1(outputList);
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private String toLog(Double dbl) {
         return Math.log(dbl) + "";
     }
 
     private String toLog(String str) {
         return Math.log(Double.parseDouble(str)) + "";
+    }
+
+
+    private FileWriter getFileWriter1(List<String[]> outputList) throws IOException {
+        File file = new File(this.stockSymbol + "_with_ma.arff");
+        FileWriter writer = new FileWriter(file);
+
+        String header =
+                "@relation " + this.stockSymbol + "\n" + """
+@attribute 'Date' numeric
+@attribute 'Open' numeric
+@attribute 'OpenMA05' numeric
+@attribute 'OpenMA10' numeric
+@attribute 'OpenMA15' numeric
+@attribute 'OpenMA20' numeric
+@attribute 'OpenMA25' numeric
+@attribute 'OpenMA30' numeric
+@attribute 'OpenSQRTMA05' numeric
+@attribute 'OpenSQRTMA10' numeric
+@attribute 'OpenSQRTMA15' numeric
+@attribute 'OpenSQRTMA20' numeric
+@attribute 'OpenSQRTMA25' numeric
+@attribute 'OpenSQRTMA30' numeric
+@attribute 'prevHigh' numeric
+@attribute 'prevLow' numeric
+@attribute 'prevClose' numeric
+@attribute class-att {0, 1}
+
+@data\n""";
+
+        writer.write(header);
+        int k = 0;
+        for (String[] array: outputList) {
+
+            boolean first = true;
+            int i = 0;
+            for (String s: array) {
+
+                if (!first) {
+                    writer.write(",");
+                }
+
+                writer.write(s);
+                first = false;
+                i++;
+            }
+
+            writer.write("\n");
+
+            k++;
+        }
+        return writer;
     }
 
     private FileWriter getFileWriter(List<String[]> outputList) throws IOException {

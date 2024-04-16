@@ -24,10 +24,11 @@ public class Main {
 //                    "GD",
 //                    "LMT",
 //                    "RTX",
-                    "AAPL",
+                    "JOBY",
             }).forEach(e -> {
                 YahooFinancier yf = new YahooFinancier(e);
                 yf.generateFile();
+                yf.generateFile1();
                 yf.generateFile2();
                 System.out.println("Files generated!");
             });
