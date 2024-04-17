@@ -1,25 +1,26 @@
 ## Introduction
 
-The project consists of 5 parts
+The repository contains all the source codes of a group project in a FinTech course.
 
 ### Prototype folder
 
-Is a maven project which was created to test how to invoke the classifier model in weka.
+Two maven projects:
+ - One is created to test how to invoke the classifier model in weka.
+ - Another is used to convert the csv file and generate various files WEKA read. 
 
 It can be used to quickly verify how to use weka in program.
 
 ### SQL folder
 
-It is used to store the SQL scripts that needs to run before starting any of the projects.
+Currently, the folder is empty.
 
 ### Java folder
 
-It contains a standalone JMIX project. The core logic of the whole project is in it.
+It contains a standalone JMIX project. The core logic of prediction is in the project. It also contains some web pages.
 
 ### OracleAPEX folder
 
-It contains an Oracle APEX application.
-
+It contains an Oracle APEX application, Oracle APEX's interactive report is used to display price and evaluation metrics.
 
 ### Demo folder
 
@@ -38,17 +39,4 @@ Download the OVA file from the URL provided.
 Open virtual box, Import Virtual Appliance, choose the ova file and import the VM.
 After import, start the VM
 
-### Access
-Once the VM has started, open
 
-http://openai.asuscomm.com:7070/
-username/password: admin/admin
-
-http://localhost:8080/ords/r/ftproject/ftapp/interactive-report
-http://localhost:8080/ords/r/ftproject/ftapp/evaluation-interactive-report
-
-http://openai.asuscomm.com:7070
-
-http://openai.asuscomm.com:8080/ords/r/ftproject/ftapp/interactive-report
-
-http://openai.asuscomm.com:8080/ords/r/ftproject/ftapp/evaluation-interactive-report
