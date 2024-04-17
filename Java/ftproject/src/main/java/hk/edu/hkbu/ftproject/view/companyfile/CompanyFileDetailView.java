@@ -1,5 +1,6 @@
 package hk.edu.hkbu.ftproject.view.companyfile;
 
+import com.vaadin.flow.component.ClickEvent;
 import hk.edu.hkbu.ftproject.entity.CompanyFile;
 
 import hk.edu.hkbu.ftproject.entity.ProcessStatus;
@@ -20,9 +21,11 @@ import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.component.upload.FileStorageUploadField;
 import io.jmix.flowui.component.upload.FileUploadField;
 import io.jmix.flowui.component.upload.receiver.FileTemporaryStorageBuffer;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.upload.event.FileUploadSucceededEvent;
 import io.jmix.flowui.upload.TemporaryStorage;
 import io.jmix.flowui.view.*;
+import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -34,14 +37,7 @@ import java.util.UUID;
 @EditedEntityContainer("companyFileDc")
 public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
     @ViewComponent
-    private FileStorageUploadField fileField;
-
-    @Autowired
-    private TemporaryStorage temporaryStorage;
-    @ViewComponent
-    private TypedTextField<String> filePathField;
-    @ViewComponent
-    private TypedTextField<String> fileNameField;
+    private JmixButton saveAndCloseBtn;
     @ViewComponent
     private TypedTextField<String> symbolField;
     @ViewComponent
@@ -52,31 +48,24 @@ public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
     private StockDataService stockDataService;
     @Autowired
     private BackgroundWorker backgroundWorker;
-    @Autowired
-    private Notifications notifications;
 
-    protected void setupEntityToEdit() {
-        super.setupEntityToEdit();
-    }
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
 
-        this.fileNameField.setVisible(false);
-        this.filePathField.setVisible(false);
-
         if (this.getEditedEntity().getSymbol() != null) {
             if (this.statusField != null && ProcessStatus.PROCESSING.equals(this.statusField.getValue())) {
-                this.fileField.setEnabled(false);
+
                 this.saveAction.setEnabled(false);
             } else {
-                this.fileField.setEnabled(true);
+
                 this.saveAction.setEnabled(true);
             }
 
             this.statusField.setEnabled(false);
             this.symbolField.setEnabled(false);
         } else {
+
             this.statusField.setVisible(false);
             this.statusField.setValue(ProcessStatus.DRAFT);
             this.symbolField.setEnabled(true);
@@ -88,31 +77,21 @@ public class CompanyFileDetailView extends StandardDetailView<CompanyFile> {
         return super.initContent();
     }
 
-    @Subscribe("fileField")
-    public void onFileFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileStorageUploadField> event) {
 
-        if (symbolField.getValue() != null
-                && !symbolField.getValue().equals("")
-                && event.getReceiver() instanceof FileTemporaryStorageBuffer buffer) {
-            File file = buffer.getFileData().getFileInfo().getFile();
-            fileField.setValue(null);
-            filePathField.setValue("filePath");
-            fileNameField.setValue("fileName");
+    @Subscribe
+    public void onAfterSave(final AfterSaveEvent event) {
 
-            if (file != null) {
+        if (event.getSource().equals(this)) {
+            if (symbolField.getValue() != null
+                    && !symbolField.getValue().equals("")
+                    && !this.statusField.getValue().equals(ProcessStatus.PROCESSING)) {
 
                 statusField.setValue(ProcessStatus.PROCESSING);
-                BackgroundTaskHandler taskHandler = backgroundWorker.handle(new BackgroundTask<Integer, Void>(7200) {
-                    @Override
-                    public Void run(TaskLifeCycle<Integer> taskLifeCycle) {
-                        stockDataService.proecess(symbolField.getValue(), file);
-                        return null;
-                    }
-                });
-                taskHandler.execute();
+                String symbol = symbolField.getValue();
+                stockDataService.processSymbol(symbol);
+
             }
         }
     }
-
 
 }

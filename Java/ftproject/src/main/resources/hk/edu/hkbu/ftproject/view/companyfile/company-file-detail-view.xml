@@ -21,10 +21,7 @@
         <formLayout id="form" dataContainer="companyFileDc">
             <vbox>
                 <textField id="symbolField" property="symbol" label="Stock Symbol:"/>
-                <textField id="filePathField" property="filePath"/>
-                <textField id="fileNameField" property="fileName"/>
                 <select id="statusField" property="status" label="Status: "/>
-                <fileStorageUploadField id="fileField" fileStoragePutMode="MANUAL" label="CSV File"/>
             </vbox>
 
         </formLayout>

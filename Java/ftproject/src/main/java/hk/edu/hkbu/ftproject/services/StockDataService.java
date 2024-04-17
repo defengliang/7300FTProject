@@ -6,6 +6,10 @@ import hk.edu.hkbu.ftproject.entity.*;
 import hk.edu.hkbu.ftproject.entity.key.EvalTblCompKey;
 import hk.edu.hkbu.ftproject.entity.key.PriceTblCompKey;
 import io.jmix.core.DataManager;
+import io.jmix.flowui.backgroundtask.BackgroundTask;
+import io.jmix.flowui.backgroundtask.BackgroundTaskHandler;
+import io.jmix.flowui.backgroundtask.BackgroundWorker;
+import io.jmix.flowui.backgroundtask.TaskLifeCycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,26 +22,36 @@ import weka.core.Instances;
 import java.io.*;
 
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service("stockDataService")
 public class StockDataService {
 
-
+    private final BackgroundWorker backgroundWorker;
 
     @Autowired
     private DataManager dataManager;
+
+    public StockDataService(BackgroundWorker backgroundWorker) {
+        this.backgroundWorker = backgroundWorker;
+    }
 
 
     @Transactional
     private void updateStatus(String symbol, ProcessStatus status) {
 
-        CompanyFile entity = dataManager.load(CompanyFile.class).id(symbol).one();
-        if (entity != null) {
-            entity.setStatus(status);
+        Optional<CompanyFile>  companyFileOptional = dataManager.load(CompanyFile.class).id(symbol).optional();
+        if (!companyFileOptional.isEmpty()) {
+            companyFileOptional.get().setStatus(status);
+            dataManager.save(companyFileOptional.get());
         }
-        dataManager.save(entity);
+
     }
 
     @Transactional
@@ -54,6 +68,23 @@ public class StockDataService {
                         " where a.id.symbol = :symbol")
                 .parameter("symbol", symbol)
                 .list().forEach(e -> dataManager.remove(e));
+    }
+
+    public void processSymbol(String symbol) {
+
+        BackgroundTaskHandler taskHandler = backgroundWorker.handle(new BackgroundTask<Integer, Void>(7200) {
+            @Override
+            public Void run(TaskLifeCycle<Integer> taskLifeCycle) {
+                System.out.println(symbol);
+
+                File file = getFile(symbol);
+                if (file.exists()) {
+                    proecess(symbol, file);
+                }
+                return null;
+            }
+        });
+        taskHandler.execute();
     }
 
     @Transactional
@@ -91,6 +122,68 @@ public class StockDataService {
         }
     }
 
+
+
+
+
+    public File getFile(String symbol) {
+
+        LocalDate today = LocalDate.now();
+        // Convert today's date to epoch time
+        long epochTime = today.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+
+        String urlString = "https://query1.finance.yahoo.com/v7/finance/download/"
+                + symbol
+                + "?period1=315532800&period2="
+                + epochTime
+                + "&interval=1d&events=history&includeAdjustedClose=true";
+
+        String filename = "/tmp/" + symbol + "_stock_prices.csv";
+        boolean fileUnavailable = true;
+
+        while (fileUnavailable) {
+
+            BufferedInputStream in = null;
+            FileOutputStream fout = null;
+            try {
+                in = new BufferedInputStream(new URL(urlString).openStream());
+                fout = new FileOutputStream(filename);
+
+                final byte data[] = new byte[1024];
+                int count;
+                while ((count = in.read(data, 0, 1024)) != -1) {
+                    fout.write(data, 0, count);
+                }
+                fout.flush();
+
+                return new File(filename);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+                fileUnavailable = false;
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                if (fout != null) {
+                    try {
+                        fout.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+            }
+        }
+        return null;
+    }
 
     public void proecess(String symbol, File file) {
 
@@ -308,9 +401,4 @@ public class StockDataService {
             throw new RuntimeException(e);
         }
     }
-
-    public boolean fetchQuote(String symbol, String startDate, String endDate) {
-        return true;
-    }
-
 }

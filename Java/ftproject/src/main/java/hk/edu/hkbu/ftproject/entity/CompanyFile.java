@@ -20,12 +20,10 @@ public class CompanyFile {
     @NotNull
     private String symbol;
 
-    @NotNull
-    @Column(name = "FILE_PATH", nullable = false, length = 1000)
+    @Column(name = "FILE_PATH", length = 1000)
     private String filePath;
 
-    @NotNull
-    @Column(name = "FILE_NAME", nullable = false)
+    @Column(name = "FILE_NAME")
     private String fileName;
 
     @Column(name = "STATUS", nullable = false)
